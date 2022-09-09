@@ -19,8 +19,9 @@ pygame.display.set_caption('Laundry Day!')
 
 class Sock:
 
-    def __init__(self, color, pos):
+    def __init__(self, num, color, pos):
         self.pair = None
+        self.img = 
         self.color = color
         self.x = pos[0]
         self.y = pos[1]
