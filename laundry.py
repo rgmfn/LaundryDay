@@ -1,7 +1,9 @@
 import pygame
 
-pygame.init()
+# TODO
+#  -make wood floor
 
+pygame.init()
 
 # Constants {{{
 WW = 600  # window width
@@ -19,20 +21,21 @@ pygame.display.set_caption('Laundry Day!')
 
 class Sock:
 
-    def __init__(self, num, color, pos):
+    def __init__(self, num, color, rect):
         self.pair = None
-        self.img = 
+        self.img = pygame.image.load(f'art/sock{num}.png').convert_alpha()
         self.color = color
-        self.x = pos[0]
-        self.y = pos[1]
-        self.w = pos[2]
-        self.h = pos[3]
+        self.x = rect[0]
+        self.y = rect[1]
+        self.w = rect[2] * 3
+        self.h = rect[3] * 3
+        self.img = pygame.transform.scale(self.img, (self.w, self.h))
 
     def get_rect(self):
         return (self.x, self.y, self.w, self.h)
 
-sock1 = Sock((255, 0, 0), (30, 30, 20, 20))
-sock3 = Sock((0, 255, 0), (60, 60, 20, 20))
+sock1 = Sock(1, (255, 0, 0), (30, 30, 20, 20))
+sock3 = Sock(2, (0, 255, 0), (60, 60, 20, 20))
 
 socks = [sock1, sock3]
 held_sock = None
@@ -97,7 +100,8 @@ while run:
     # print(f'dx: {delta[0]}, dy: {delta[1]}')
 
     for sock in socks:
-        pygame.draw.rect(display, sock.color, sock.get_rect())
+        # pygame.draw.rect(display, sock.color, sock.get_rect())
+        display.blit(sock.img, sock.get_rect())
 
     # pygame.draw.rect(display, sock3.color, sock3.pos)
 
