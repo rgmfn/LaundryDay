@@ -1,12 +1,13 @@
-import pygame
 import random
+import glob
+import pygame
 
-# TODO
-#  -make (better) wood floor
+#  -light coming through window
 #  -sfx
 #  -game end screen
 #  -main menu
-#  -automatic sense number of socks
+#  -error catch an error with the sock folder
+#    +numbers not in order, one that isn't a number
 
 pygame.init()
 
@@ -14,27 +15,37 @@ pygame.init()
 WINDOW_WIDTH = 600  # window width
 WINDOW_HEIGHT = 600  # window height
 
-SCALE = 20
+SCALE = 10
 
 SOCK_WIDTH = 5 * SCALE
 SOCK_HEIGHT = 8 * SCALE
 
-C_BLACK = (255, 255, 255, 1)
-C_BROWN = (136, 58, 42, 1)
-C_RED   = (255, 0, 0, 1)
-C_BLUE  = (0, 0, 255, 1)
+C_BLACK  = (255, 255, 255, 1)
+C_BROWN  = (136, 58, 42, 1)
+C_RED    = (255, 0, 0, 1)
+C_GREEN  = (0, 255, 0, 1)
+C_BLUE   = (0, 0, 255, 1)
+C_YELLOW = (255, 255, 0, 1)
 
+# options for what happens on a menu/going between menus
 OPT_NONE = 0
 OPT_GAME = 1
-OPT_QUIT = 2
 OPT_SETTINGS = 3
+OPT_QUIT = 2
 OPT_WIN_GAME = 4
+OPT_MENU = 5
+
+MAIN_MENU_OPTIONS = [OPT_GAME, OPT_SETTINGS, OPT_QUIT]
+
+FONT_SIZE = 32
 
 MOUSE_LEFT = 1
 #}}}
 
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption('Laundry Day!')
+pygame.display.set_caption('Laundry Day')
+
+# pygame.mouse.set_visible(False)
 
 class Sock:
 
@@ -50,7 +61,7 @@ class Sock:
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.w, self.h)
 
-floor_img = pygame.image.load('art/floor1.png').convert_alpha()
+floor_img = pygame.image.load('art/floor_60.png').convert_alpha()
 floor_img = pygame.transform.scale(floor_img, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
 """
@@ -77,21 +88,23 @@ def overlaps(a, b):
     if not (a and b):
         return False
 
-    # if (not a) or (not b):
-    #     return False
-
     return a.get_rect().colliderect(b.get_rect())
+
+# text {{{
+kongtext32 = pygame.font.SysFont("kongtext", 32)
+# }}}
 
 mainClock = pygame.time.Clock()
 
 # initiate socks {{{
-def initiate_socks():
+def init_socks():
     socks = []
 
-    # NUM_PAIRS = 22
-    # TODO ^ make automatic
-    NUM_PAIRS = 2
-    for i in range(1, NUM_PAIRS+1):
+    num_pairs = 0
+    for _ in glob.glob("art/sock[0-9]*.png"):
+        num_pairs += 1
+
+    for i in range(1, num_pairs+1):
         sockA = Sock(i, (random.randrange(0, WINDOW_WIDTH-SOCK_WIDTH),
                      random.randrange(0, WINDOW_HEIGHT-SOCK_HEIGHT),
                      5, 8))
@@ -109,7 +122,7 @@ def initiate_socks():
 # game loop {{{
 def game_loop():
 
-    socks = initiate_socks()
+    socks = init_socks()
     held_sock = None
 
     ret_val = OPT_NONE
@@ -183,9 +196,23 @@ def game_loop():
     return ret_val
 # }}}
 
-# menu loop {{{
-def menu_loop():
+# main menu loop {{{
+
+main_menu_bg = pygame.image.load("art/main_menu.png")
+main_menu_bg = pygame.transform.scale(main_menu_bg, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
+def main_menu_loop():
     ret_val = OPT_NONE
+
+    choice = 0  # which MENU OPTION it will select
+
+    main_menu_text = kongtext32.render("Laundy Day", False, C_BLACK)
+    menu_options_text = [kongtext32.render("PLAY", False, C_BLACK),
+                         kongtext32.render("SETTINGS", False, C_BLACK),
+                         kongtext32.render("QUIT", False, C_BLACK)]
+    menu_options_text_sel = [kongtext32.render("PLAY", False, C_YELLOW),
+                             kongtext32.render("SETTINGS", False, C_YELLOW),
+                             kongtext32.render("QUIT", False, C_YELLOW)]
 
     while not ret_val:
 
@@ -193,10 +220,59 @@ def menu_loop():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     ret_val = OPT_QUIT
-                if event.key == pygame.K_RETURN:
-                    ret_val = OPT_GAME
+                elif event.key == pygame.K_RETURN:
+                    ret_val = MAIN_MENU_OPTIONS[choice]
+
+                elif event.key == pygame.K_UP:
+                    choice -= 1
+                elif event.key == pygame.K_DOWN:
+                    choice += 1
+
+        if choice < 0:
+            choice = len(MAIN_MENU_OPTIONS) - 1
+        if choice >= len(MAIN_MENU_OPTIONS):
+            choice = 0
 
         display.fill(C_RED)
+        display.blit(main_menu_bg, (0, 0))
+
+        for i in range(len(MAIN_MENU_OPTIONS)):
+            display.blit(menu_options_text[i],
+                            (WINDOW_WIDTH/2 - menu_options_text[i].get_width()/2,
+                             WINDOW_HEIGHT/2 + FONT_SIZE*i*1.5))
+
+        display.blit(menu_options_text_sel[choice],
+                        (WINDOW_WIDTH/2 - menu_options_text_sel[choice].get_width()/2,
+                         WINDOW_HEIGHT/2 + FONT_SIZE*choice*1.5))
+
+        # display.blit(main_menu_text,
+        #                 (WINDOW_WIDTH/2 - main_menu_text.get_width()/2,
+        #                  FONT_SIZE*4))
+
+        pygame.display.update()
+        mainClock.tick(30)
+
+    return ret_val
+# }}}
+
+# settings loop {{{
+
+def settings_loop():
+    ret_val = OPT_NONE
+
+    settings_menu_text = kongtext32.render("Settings", False, C_BLACK)
+
+    while not ret_val:
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                ret_val = OPT_MENU
+
+        display.fill(C_BLUE)
+
+        display.blit(settings_menu_text,
+                        (WINDOW_WIDTH/2 - settings_menu_text.get_width()/2,
+                         FONT_SIZE))
 
         pygame.display.update()
         mainClock.tick(30)
@@ -206,12 +282,12 @@ def menu_loop():
 
 # end screen loop {{{
 def end_screen():
-    run_end_screen = True
-    while run_end_screen:
+    ret_val = OPT_NONE
+    while not ret_val:
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                run_end_screen = False
+                ret_val = OPT_MENU
 
         display.fill(C_BLUE)
 
@@ -222,13 +298,15 @@ def end_screen():
 # program loop {{{
 run_program = True
 while run_program:
-    menu_choice = menu_loop()
+    menu_choice = main_menu_loop()
 
     if menu_choice == OPT_GAME:
         if game_loop() == OPT_WIN_GAME:
             end_screen()
     elif menu_choice == OPT_QUIT:
         run_program = False
+    elif menu_choice == OPT_SETTINGS:
+        settings_loop()
 # }}}
 
 pygame.quit()
