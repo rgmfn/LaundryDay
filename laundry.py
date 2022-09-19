@@ -12,13 +12,16 @@ import pygame
 pygame.init()
 
 # Constants {{{
-WINDOW_WIDTH = 600  # window width
-WINDOW_HEIGHT = 600  # window height
+SCREEN_WIDTH = 60
+SCREEN_HEIGHT = 60
 
 SCALE = 10
 
-SOCK_WIDTH = 5 * SCALE
-SOCK_HEIGHT = 8 * SCALE
+WINDOW_WIDTH = SCREEN_WIDTH * SCALE
+WINDOW_HEIGHT = SCREEN_HEIGHT * SCALE
+
+SOCK_WIDTH = 5
+SOCK_HEIGHT = 8
 
 C_BLACK  = (255, 255, 255, 1)
 C_BROWN  = (136, 58, 42, 1)
@@ -64,6 +67,12 @@ class Sock:
 floor_img = pygame.image.load('art/floor_60.png').convert_alpha()
 floor_img = pygame.transform.scale(floor_img, (WINDOW_WIDTH, WINDOW_HEIGHT))
 
+light_beam_img = pygame.image.load('art/light_beams.png').convert_alpha()
+light_beam_img = pygame.transform.scale(light_beam_img, (WINDOW_WIDTH, WINDOW_HEIGHT))
+
+bed_img = pygame.image.load('art/bed.png').convert_alpha()
+beg_img = pygame.transform.scale(bed_img, (bed_img.get_width()*SCALE, bed_img.get_height()*SCALE))
+
 """
 gets top item from pile that is under cursor
 
@@ -105,11 +114,11 @@ def init_socks():
         num_pairs += 1
 
     for i in range(1, num_pairs+1):
-        sockA = Sock(i, (random.randrange(0, WINDOW_WIDTH-SOCK_WIDTH),
-                     random.randrange(0, WINDOW_HEIGHT-SOCK_HEIGHT),
+        sockA = Sock(i, (random.randrange(0, WINDOW_WIDTH-SOCK_WIDTH*SCALE),
+                     random.randrange(0, WINDOW_HEIGHT-SOCK_HEIGHT*SCALE),
                      5, 8))
-        sockB = Sock(i, (random.randrange(0, WINDOW_WIDTH-SOCK_WIDTH),
-                     random.randrange(0, WINDOW_HEIGHT-SOCK_HEIGHT),
+        sockB = Sock(i, (random.randrange(0, WINDOW_WIDTH-SOCK_WIDTH*SCALE),
+                     random.randrange(0, WINDOW_HEIGHT-SOCK_HEIGHT*SCALE),
                      5, 8))
         sockA.pair = sockB
         sockB.pair = sockA
@@ -187,8 +196,12 @@ def game_loop():
         display.fill(C_BROWN)
         display.blit(floor_img, (0, 0))
 
+        display.blit(bed_img, (0, 2*SCALE))
+
         for sock in socks:
             display.blit(sock.img, sock.get_rect())
+
+        display.blit(light_beam_img, (0, 0))
 
         pygame.display.update()
         mainClock.tick(30)
