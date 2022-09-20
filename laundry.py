@@ -4,10 +4,10 @@ import pygame
 
 #  -game end screen
 #  -sfx
-#  -light coming through window?
+#  -light coming through window? (remove cross hatch?)
 #  -error catch an error with the sock folder
 #    +numbers not in order, one that isn't a number
-#  -custom sock folder? more relaxed with file names? check width of files?
+#  -name on main menu
 
 pygame.init()
 
@@ -56,13 +56,13 @@ pygame.display.set_caption('Laundry Day')
 
 class Sock:
 
-    def __init__(self, num, rect):
+    def __init__(self, img, coords):
         self.pair = None
-        self.img = pygame.image.load(f'art/sock{num}.png').convert_alpha()
-        self.x = rect[0]
-        self.y = rect[1]
-        self.w = rect[2]
-        self.h = rect[3]
+        self.img = img
+        self.x = coords[0]
+        self.y = coords[1]
+        self.w = img.get_width()
+        self.h = img.get_width()
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.w, self.h)
@@ -116,19 +116,16 @@ mainClock = pygame.time.Clock()
 def init_socks():
     socks = []
 
-    num_pairs = 0
-    for _ in glob.glob("art/sock[0-9]*.png"):
-        num_pairs += 1
+    for sock_file in glob.glob("art/socks/*.png"):
 
-    num_pairs = 2
+        sock_img = pygame.image.load(sock_file).convert_alpha()
+        if sock_img.get_width() != SOCK_WIDTH or sock_img.get_height() != SOCK_HEIGHT:
+            continue
 
-    for i in range(1, num_pairs+1):
-        sockA = Sock(i, (random.randrange(0, SCREEN_WIDTH-SOCK_WIDTH),
-                     random.randrange(bed_img.get_height()+1, SCREEN_HEIGHT-SOCK_HEIGHT),
-                     5, 8))
-        sockB = Sock(i, (random.randrange(0, SCREEN_WIDTH-SOCK_WIDTH),
-                     random.randrange(bed_img.get_height()+1, SCREEN_HEIGHT-SOCK_HEIGHT),
-                     5, 8))
+        sockA = Sock(sock_img, (random.randrange(0, SCREEN_WIDTH-SOCK_WIDTH),
+                     random.randrange(bed_img.get_height()+1, SCREEN_HEIGHT-SOCK_HEIGHT)))
+        sockB = Sock(sock_img, (random.randrange(0, SCREEN_WIDTH-SOCK_WIDTH),
+                     random.randrange(bed_img.get_height()+1, SCREEN_HEIGHT-SOCK_HEIGHT)))
         sockA.pair = sockB
         sockB.pair = sockA
         socks.append(sockA)
@@ -226,16 +223,6 @@ main_menu_bg = pygame.image.load("art/main_menu3.png")
 # main_menu_bg = pygame.transform.scale(main_menu_bg, (DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
 def main_menu_loop():
-
-    choice = 0  # which MENU OPTION it will select
-
-    # main_menu_text = kongtext32.render("Laundy Day", False, C_BLACK)
-    # menu_options_text = [kongtext32.render("PLAY", False, C_BLACK),
-    #                      kongtext32.render("SETTINGS", False, C_BLACK),
-    #                      kongtext32.render("QUIT", False, C_BLACK)]
-    # menu_options_text_sel = [kongtext32.render("PLAY", False, C_YELLOW),
-    #                          kongtext32.render("SETTINGS", False, C_YELLOW),
-    #                          kongtext32.render("QUIT", False, C_YELLOW)]
 
     # choice*2 for button, choice*2 + 1 for selected button
     main_menu_buttons = [pygame.image.load('art/play.png'),
