@@ -5,8 +5,6 @@ import pygame
 #  -game end screen
 #  -sfx
 #  -light coming through window? (remove cross hatch?)
-#  -error catch an error with the sock folder
-#    +numbers not in order, one that isn't a number
 #  -name on main menu
 
 pygame.init()
@@ -29,6 +27,7 @@ C_RED    = (255, 0, 0, 1)
 C_GREEN  = (0, 255, 0, 1)
 C_BLUE   = (0, 0, 255, 1)
 C_YELLOW = (255, 255, 0, 1)
+C_NONE   = (0, 0, 0, 0)
 
 # options for what happens on a menu/going between menus
 OPT_NONE = 0
@@ -113,6 +112,15 @@ kongtext32 = pygame.font.SysFont("kongtext", FONT_SIZE)
 mainClock = pygame.time.Clock()
 
 # initiate socks {{{
+sock_color = [[0, 0, 1, 1, 1],
+              [0, 0, 1, 1, 1],
+              [0, 0, 1, 1, 1],
+              [0, 0, 1, 1, 1],
+              [0, 1, 1, 1, 1],
+              [1, 1, 1, 1, 1],
+              [1, 1, 1, 1, 0],
+              [1, 1, 1, 0, 0]]
+
 def init_socks():
     socks = []
 
@@ -120,6 +128,20 @@ def init_socks():
 
         sock_img = pygame.image.load(sock_file).convert_alpha()
         if sock_img.get_width() != SOCK_WIDTH or sock_img.get_height() != SOCK_HEIGHT:
+            continue
+
+        valid_sock = True
+        for ay, arr in enumerate(sock_color):
+            for ax, _ in enumerate(arr):
+                if ((not sock_color[ay][ax] and sock_img.get_at((ax, ay))[3] != 0) or
+                        (sock_color[ay][ax] and sock_img.get_at((ax, ay))[3] == 0)):
+                    valid_sock = False
+                    break
+
+            if not valid_sock:
+                break
+
+        if not valid_sock:
             continue
 
         sockA = Sock(sock_img, (random.randrange(0, SCREEN_WIDTH-SOCK_WIDTH),
@@ -147,11 +169,11 @@ def game_loop():
             if event.type == pygame.QUIT:
                 ret_val = OPT_QUIT
 
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     ret_val = OPT_QUIT
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == MOUSE_LEFT:
                     # get sock furthest back in the array who is under the mouse
                     held_sock = get_top_item(socks)
@@ -162,20 +184,20 @@ def game_loop():
                         socks.append(held_sock)
                         # print(f'picked up {held_sock.color} sock')
 
-            if event.type == pygame.MOUSEMOTION:
+            elif event.type == pygame.MOUSEMOTION:
                 buttons = pygame.mouse.get_pressed()
 
                 if not held_sock:
                     pygame.mouse.get_rel()
                     # get_rel calculates based off of the last time it was called,
                     #   needs to be called right before picked up
-                if held_sock and buttons[0]:
+                elif held_sock and buttons[0]:
                     md = pygame.mouse.get_rel()
                     # print(f'mouse delta: {md}')
                     held_sock.x += md[0]/SCALE
                     held_sock.y += md[1]/SCALE
 
-            if event.type == pygame.MOUSEBUTTONUP:
+            elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == MOUSE_LEFT:
                     if held_sock:  # check if putting a sock down on its match
                         if overlaps(held_sock, held_sock.pair):
@@ -241,7 +263,14 @@ def main_menu_loop():
     while not ret_val:
 
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEMOTION:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    ret_val = OPT_QUIT
+
+            elif event.type == pygame.QUIT:
+                ret_val = OPT_QUIT
+
+            elif event.type == pygame.MOUSEMOTION:
                 mx, my = pygame.mouse.get_pos()
                 mx /= SCALE
                 my /= SCALE
@@ -253,48 +282,15 @@ def main_menu_loop():
                             button_coords[i][1] + main_menu_buttons[i*2].get_height()):
                         button_hovered = i + 1
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 if button_hovered > OPT_NONE:
                     ret_val = button_hovered
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    ret_val = OPT_QUIT
-            #     elif event.key == pygame.K_RETURN:
-            #         ret_val = MAIN_MENU_OPTIONS[choice]
-
-            #     elif event.key == pygame.K_UP:
-            #         choice -= 1
-            #     elif event.key == pygame.K_DOWN:
-            #         choice += 1
-
-        # if choice < 0:
-            # choice = len(MAIN_MENU_OPTIONS) - 1
-        # if choice >= len(MAIN_MENU_OPTIONS):
-            # choice = 0
 
         screen.fill(C_RED)
         screen.blit(main_menu_bg, (0, 0))
 
-        #{{{
-        # for i in range(len(MAIN_MENU_OPTIONS)):
-        #     screen.blit(menu_options_text[i],
-        #                     (SCREEN_WIDTH/2 - menu_options_text[i].get_width()/2,
-        #                      SCREEN_HEIGHT/2 + FONT_SIZE*i*1.5))
-
-        # screen.blit(menu_options_text_sel[choice],
-        #                 (SCREEN_WIDTH/2 - menu_options_text_sel[choice].get_width()/2,
-        #                  SCREEN_HEIGHT/2 + FONT_SIZE*choice*1.5))
-
-        # screen.blit(main_menu_text,
-        #                 (DISPLAY_WIDTH/2 - main_menu_text.get_width()/2,
-        #                  FONT_SIZE*4))
-        # }}}
-
         for i in range(len(MAIN_MENU_OPTIONS)):
             screen.blit(main_menu_buttons[i*2], button_coords[i])
-
-        # screen.blit(main_menu_buttons[choice*2 + 1], button_coords[choice])
 
         if button_hovered:
             screen.blit(main_menu_buttons[(button_hovered-1)*2 + 1],
