@@ -2,12 +2,12 @@ import random
 import glob
 import pygame
 
-#  -light coming through window
-#  -sfx
 #  -game end screen
-#  -main menu
+#  -sfx
+#  -light coming through window?
 #  -error catch an error with the sock folder
 #    +numbers not in order, one that isn't a number
+#  -custom sock folder? more relaxed with file names? check width of files?
 
 pygame.init()
 
@@ -33,8 +33,8 @@ C_YELLOW = (255, 255, 0, 1)
 # options for what happens on a menu/going between menus
 OPT_NONE = 0
 OPT_GAME = 1
-OPT_SETTINGS = 3
-OPT_QUIT = 2
+OPT_SETTINGS = 2
+OPT_QUIT = 3
 OPT_WIN_GAME = 4
 OPT_MENU = 5
 
@@ -119,6 +119,8 @@ def init_socks():
     num_pairs = 0
     for _ in glob.glob("art/sock[0-9]*.png"):
         num_pairs += 1
+
+    num_pairs = 2
 
     for i in range(1, num_pairs+1):
         sockA = Sock(i, (random.randrange(0, SCREEN_WIDTH-SOCK_WIDTH),
@@ -246,20 +248,31 @@ def main_menu_loop():
                      (16, 39),
                      (19, 47)]
 
+    button_hovered = OPT_NONE
+
     ret_val = OPT_NONE
     while not ret_val:
 
         for event in pygame.event.get():
             if event.type == pygame.MOUSEMOTION:
-                # check if inside one of the boxes
-                pass
+                mx, my = pygame.mouse.get_pos()
+                mx /= SCALE
+                my /= SCALE
+
+                for i in range(len(MAIN_MENU_OPTIONS)):
+                    if (button_coords[i][0] <= mx <
+                            button_coords[i][0] + main_menu_buttons[i*2].get_width() and
+                            button_coords[i][1] <= my <
+                            button_coords[i][1] + main_menu_buttons[i*2].get_height()):
+                        button_hovered = i + 1
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                pass
+                if button_hovered > OPT_NONE:
+                    ret_val = button_hovered
 
-            # if event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_ESCAPE:
-            #         ret_val = OPT_QUIT
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    ret_val = OPT_QUIT
             #     elif event.key == pygame.K_RETURN:
             #         ret_val = MAIN_MENU_OPTIONS[choice]
 
@@ -294,7 +307,11 @@ def main_menu_loop():
         for i in range(len(MAIN_MENU_OPTIONS)):
             screen.blit(main_menu_buttons[i*2], button_coords[i])
 
-        screen.blit(main_menu_buttons[choice*2 + 1], button_coords[choice])
+        # screen.blit(main_menu_buttons[choice*2 + 1], button_coords[choice])
+
+        if button_hovered:
+            screen.blit(main_menu_buttons[(button_hovered-1)*2 + 1],
+                        button_coords[button_hovered-1])
 
         pygame.transform.scale(screen, (DISPLAY_WIDTH, DISPLAY_HEIGHT), display)
 
@@ -319,8 +336,10 @@ def settings_loop():
         screen.fill(C_BLUE)
 
         screen.blit(settings_menu_text,
-                        (DISPLAY_WIDTH/2 - settings_menu_text.get_width()/2,
+                        (SCREEN_WIDTH/2 - settings_menu_text.get_width()/2,
                          FONT_SIZE))
+
+        pygame.transform.scale(screen, (DISPLAY_WIDTH, DISPLAY_HEIGHT), display)
 
         pygame.display.update()
         mainClock.tick(30)
@@ -339,6 +358,8 @@ def end_screen():
 
         screen.fill(C_BLUE)
 
+        pygame.transform.scale(screen, (DISPLAY_WIDTH, DISPLAY_HEIGHT), display)
+
         pygame.display.update()
         mainClock.tick(30)
 # }}}
@@ -351,6 +372,7 @@ while run_program:
     if menu_choice == OPT_GAME:
         if game_loop() == OPT_WIN_GAME:
             end_screen()
+            bed_img = pygame.image.load('art/clean_bed.png').convert_alpha()
     elif menu_choice == OPT_QUIT:
         run_program = False
     elif menu_choice == OPT_SETTINGS:
