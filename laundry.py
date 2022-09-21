@@ -303,23 +303,43 @@ def main_menu_loop():
     return ret_val
 # }}}
 
-# settings loop {{{
+# how to loop {{{
 
-def settings_loop():
-    settings_menu_text = kongtext32.render("Settings", False, C_BLACK)
+how_to_imgs = [[pygame.image.load(f'art/how_to_pg0_{i}.png') for i in range(5)],
+               [pygame.image.load(f'art/how_to_pg1_{i}.png') for i in range(5)]]
+
+def how_to_loop():
+
+    page_num = 0
+    page_imgs = how_to_imgs[page_num]
+    start_time = pygame.time.get_ticks()
 
     ret_val = OPT_NONE
     while not ret_val:
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                ret_val = OPT_MENU
+                if page_num == 0:
+                    page_num = 1
+                    page_imgs = how_to_imgs[page_num]
+                    start_time = pygame.time.get_ticks()
+                else:
+                    if event.key == pygame.K_BACKSPACE:
+                        page_num = 0
+                        page_imgs = how_to_imgs[page_num]
+                        start_time = pygame.time.get_ticks()
+                    else:
+                        ret_val = OPT_MENU
 
         screen.fill(C_BLUE)
 
-        screen.blit(settings_menu_text,
-                        (SCREEN_WIDTH/2 - settings_menu_text.get_width()/2,
-                         FONT_SIZE))
+        time_elapsed = math.floor((pygame.time.get_ticks() - start_time)/500)
+
+        if time_elapsed >= len(page_imgs):
+            start_time = pygame.time.get_ticks()
+            time_elapsed = 0
+
+        screen.blit(page_imgs[time_elapsed], (0, 0))
 
         pygame.transform.scale(screen, (DISPLAY_WIDTH, DISPLAY_HEIGHT), display)
 
@@ -351,9 +371,6 @@ def end_screen():
         screen.fill(C_BLUE)
 
         time_elapsed = math.floor((pygame.time.get_ticks() - start_time)/1000)
-        # print(f'start_time: {start_time}')
-        # print(f'curr_time: {pygame.time.get_ticks()}')
-        # print(f'time_elapsed: {time_elapsed}')
 
         if done_fading:
             screen.blit(end_screen_img, (0, 0))
@@ -382,7 +399,7 @@ while run_program:
     elif menu_choice == OPT_QUIT:
         run_program = False
     elif menu_choice == OPT_SETTINGS:
-        settings_loop()
+        how_to_loop()
 # }}}
 
 pygame.quit()
