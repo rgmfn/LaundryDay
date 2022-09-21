@@ -3,10 +3,8 @@ import glob
 import math
 import pygame
 
-#  -game end screen
 #  -sfx
 #  -light coming through window? (remove cross hatch?)
-#  -name on main menu
 
 pygame.init()
 
