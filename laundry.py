@@ -45,12 +45,10 @@ MOUSE_LEFT = 1
 #}}}
 
 display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-# screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
 screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+
 pygame.display.set_caption('Laundry Day')
 
-# pygame.mouse.set_visible(False)
 
 class Sock:
 
@@ -65,14 +63,9 @@ class Sock:
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.w, self.h)
 
-floor_img = pygame.image.load('art/floor_60.png').convert_alpha()
-# floor_img = pygame.transform.scale(floor_img, (DISPLAY_WIDTH, DISPLAY_HEIGHT))
-
 light_beam_img = pygame.image.load('art/light_beams.png').convert_alpha()
-# light_beam_img = pygame.transform.scale(light_beam_img, (DISPLAY_WIDTH, DISPLAY_HEIGHT))
-
+floor_img = pygame.image.load('art/floor_60.png').convert_alpha()
 bed_img = pygame.image.load('art/bed.png').convert_alpha()
-# beg_img = pygame.transform.scale(bed_img, (bed_img.get_width()*SCALE, bed_img.get_height()*SCALE))
 
 """
 gets top item from pile that is under cursor
@@ -103,10 +96,6 @@ def overlaps(a, b):
         return False
 
     return a.get_rect().colliderect(b.get_rect())
-
-# text {{{
-kongtext32 = pygame.font.SysFont("kongtext", FONT_SIZE)
-# }}}
 
 mainClock = pygame.time.Clock()
 
@@ -395,7 +384,6 @@ while run_program:
     if menu_choice == OPT_GAME:
         if game_loop() == OPT_WIN_GAME:
             end_screen()
-            # bed_img = pygame.image.load('art/clean_bed.png').convert_alpha()
     elif menu_choice == OPT_QUIT:
         run_program = False
     elif menu_choice == OPT_SETTINGS:
