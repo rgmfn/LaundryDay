@@ -4,7 +4,7 @@ import math
 import pygame
 
 #  -sfx
-#  -light coming through window? (remove cross hatch?)
+#  -mouse to click through how to play
 
 pygame.init()
 
@@ -58,7 +58,7 @@ class Sock:
         self.x = coords[0]
         self.y = coords[1]
         self.w = img.get_width()
-        self.h = img.get_width()
+        self.h = img.get_height()
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.w, self.h)
@@ -354,7 +354,7 @@ def end_screen():
     while not ret_val:
 
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN or pygame.MOUSEBUTTONDOWN:
                 ret_val = OPT_MENU
 
         screen.fill(C_BLUE)
