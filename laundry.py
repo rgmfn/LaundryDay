@@ -63,6 +63,7 @@ class Sock:
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.w, self.h)
 
+
 light_beam_img = pygame.image.load('art/light_beams.png').convert_alpha()
 floor_img = pygame.image.load('art/floor_60.png').convert_alpha()
 bed_img = pygame.image.load('art/bed.png').convert_alpha()
@@ -188,6 +189,15 @@ def game_loop():
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == MOUSE_LEFT:
                     if held_sock:  # check if putting a sock down on its match
+                        if held_sock.x < SOCK_WIDTH:
+                            held_sock.x = -SOCK_WIDTH+1
+                        elif held_sock.x >= SCREEN_WIDTH:
+                            held_sock.x = SCREEN_WIDTH-1
+                        if held_sock.y < SOCK_HEIGHT:
+                            held_sock.y = -SOCK_HEIGHT+1
+                        elif held_sock.y >= SCREEN_HEIGHT:
+                            held_sock.y = SCREEN_HEIGHT-1
+
                         if overlaps(held_sock, held_sock.pair):
                             held_pair_index = socks.index(held_sock.pair)
                             held_pair = socks[held_pair_index]
@@ -307,13 +317,15 @@ def how_to_loop():
     while not ret_val:
 
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
+            if (event.type == pygame.KEYDOWN or
+                    event.type == pygame.MOUSEBUTTONDOWN):
                 if page_num == 0:
                     page_num = 1
                     page_imgs = how_to_imgs[page_num]
                     start_time = pygame.time.get_ticks()
                 else:
-                    if event.key == pygame.K_BACKSPACE:
+                    if (event.__dict__.get('key') and event.key == pygame.K_BACKSPACE or
+                            event.__dict__.get('button') and event.button == 3):
                         page_num = 0
                         page_imgs = how_to_imgs[page_num]
                         start_time = pygame.time.get_ticks()
@@ -354,7 +366,8 @@ def end_screen():
     while not ret_val:
 
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN or pygame.MOUSEBUTTONDOWN:
+            if (event.type == pygame.KEYDOWN or
+                    event.type == pygame.MOUSEBUTTONDOWN) and done_fading:
                 ret_val = OPT_MENU
 
         screen.fill(C_BLUE)
