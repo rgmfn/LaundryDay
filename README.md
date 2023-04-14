@@ -1,5 +1,5 @@
 <h1 align="center">
-Laundry Day
+    <img src="https://github.com/rgmfn/LaundryDay/blob/master/art/logo.png" alt="Laundry Day">
 </h1>
 
 Usage
