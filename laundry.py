@@ -4,7 +4,6 @@ import math
 import pygame
 
 #  -sfx
-#  -mouse to click through how to play
 
 pygame.init()
 
