@@ -188,11 +188,11 @@ def game_loop():
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == MOUSE_LEFT:
                     if held_sock:  # check if putting a sock down on its match
-                        if held_sock.x < SOCK_WIDTH:
+                        if held_sock.x <= -SOCK_WIDTH:
                             held_sock.x = -SOCK_WIDTH+1
                         elif held_sock.x >= SCREEN_WIDTH:
                             held_sock.x = SCREEN_WIDTH-1
-                        if held_sock.y < SOCK_HEIGHT:
+                        if held_sock.y <= -SOCK_HEIGHT:
                             held_sock.y = -SOCK_HEIGHT+1
                         elif held_sock.y >= SCREEN_HEIGHT:
                             held_sock.y = SCREEN_HEIGHT-1
